@@ -1,0 +1,82 @@
+version: '3'
+services:
+#mssql docker
+  rbike-sql:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=QWElkj132!
+      - MSSQL_PID=Developer
+    ports:
+      - 1401:1433
+    expose:
+      - 1433
+    networks:
+      - rbikenet
+    
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - rbikenet
+  
+  rbike-api:
+    restart: unless-stopped
+    build:
+      context: .
+    environment:
+      - ConnectionStrings:rBikeConnection=Server=rbike-sql,1433;Database=rBike_v2;User=sa;Password=QWElkj132!;ConnectRetryCount=0; TrustServerCertificate=True;
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - SMTP_SERVER=smtp.gmail.com
+      - EMAIL_SENDER=rbikeapp@gmail.com
+      - EMAIL_PASS=sxxuvmvsunhenyhq
+      - EMAIL_PORT=587
+    ports:
+      - 5164:5164
+    volumes:
+      - pdf_reports:/app/Reports
+    networks:
+      - rbikenet
+
+    depends_on:
+      - rbike-sql
+      - rabbitmq
+
+  rbike-console:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: rBike.Subscriber/Dockerfile
+    environment:
+      - ConnectionStrings:rBikeConnection=Server=rbike-sql,1433;Database=rBike_v2;User=sa;Password=QWElkj132!;ConnectRetryCount=0; TrustServerCertificate=True;
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - SMTP_SERVER=smtp.gmail.com
+      - EMAIL_SENDER=rbikeapp@gmail.com
+      - EMAIL_PASS=sxxuvmvsunhenyhq
+      - EMAIL_PORT=587
+    networks:
+      - rbikenet
+    depends_on:
+      - rabbitmq
+      - rbike-sql
+      - rbike-api
+ 
+networks:
+  rbikenet:
+    driver: bridge
+
+volumes:
+  pdf_reports: 

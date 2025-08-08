@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "rBike.Model": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:49381;http://localhost:49382"
+    }
+  }
+}

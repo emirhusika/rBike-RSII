@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace rBike.Services.Database;
+
+public partial class BikeFavorite
+{
+    public int FavoriteId { get; set; }
+
+    public int BikeId { get; set; }
+
+    public int UserId { get; set; }
+
+    public virtual Bike Bike { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
+}
